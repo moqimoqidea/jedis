@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import redis.clients.jedis.Builder;
@@ -19,6 +21,10 @@ import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.graph.GraphProtocol.GraphCommand;
 import redis.clients.jedis.providers.ConnectionProvider;
 
+/**
+ * @deprecated Redis Graph support is deprecated.
+ */
+@Deprecated
 public class GraphCommandObjects {
 
   private final RedisGraphCommands graph;
@@ -102,9 +108,7 @@ public class GraphCommandObjects {
   }
 
   private void createBuilder(String graphName) {
-    synchronized (builders) {
-      builders.putIfAbsent(graphName, new ResultSetBuilder(new GraphCacheImpl(graphName)));
-    }
+    builders.computeIfAbsent(graphName, graphNameKey -> new ResultSetBuilder(new GraphCacheImpl(graphNameKey)));
   }
 
   private class GraphCacheImpl implements GraphCache {
@@ -140,6 +144,8 @@ public class GraphCommandObjects {
     private final String name;
     private final String query;
     private final List<String> data = new CopyOnWriteArrayList<>();
+    
+    private final Lock dataLock = new ReentrantLock(true);
 
     /**
      *
@@ -160,14 +166,18 @@ public class GraphCommandObjects {
      */
     public String getCachedData(int index) {
       if (index >= data.size()) {
-        synchronized (data) {
+        dataLock.lock();
+        
+        try {
           if (index >= data.size()) {
             getProcedureInfo();
           }
+        } finally {
+          dataLock.unlock();
         }
       }
+      
       return data.get(index);
-
     }
 
     /**

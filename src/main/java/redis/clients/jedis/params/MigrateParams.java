@@ -3,12 +3,14 @@ package redis.clients.jedis.params;
 import redis.clients.jedis.CommandArguments;
 import redis.clients.jedis.Protocol.Keyword;
 
+import java.util.Objects;
+
 public class MigrateParams implements IParams {
 
   private boolean copy = false;
   private boolean replace = false;
   private String username = null;
-  private String passowrd = null;
+  private String password = null;
 
   public MigrateParams() {
   }
@@ -28,13 +30,13 @@ public class MigrateParams implements IParams {
   }
 
   public MigrateParams auth(String password) {
-    this.passowrd = password;
+    this.password = password;
     return this;
   }
 
   public MigrateParams auth2(String username, String password) {
     this.username = username;
-    this.passowrd = password;
+    this.password = password;
     return this;
   }
 
@@ -47,9 +49,22 @@ public class MigrateParams implements IParams {
       args.add(Keyword.REPLACE);
     }
     if (username != null) {
-      args.add(Keyword.AUTH2).add(username).add(passowrd);
-    } else if (passowrd != null) {
-      args.add(Keyword.AUTH).add(passowrd);
+      args.add(Keyword.AUTH2).add(username).add(password);
+    } else if (password != null) {
+      args.add(Keyword.AUTH).add(password);
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MigrateParams that = (MigrateParams) o;
+    return copy == that.copy && replace == that.replace && Objects.equals(username, that.username) && Objects.equals(password, that.password);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(copy, replace, username, password);
   }
 }

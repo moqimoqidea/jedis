@@ -6,7 +6,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE.txt)
 [![Integration](https://github.com/redis/jedis/actions/workflows/integration.yml/badge.svg?branch=master)](https://github.com/redis/jedis/actions/workflows/integration.yml)
 [![codecov](https://codecov.io/gh/redis/jedis/branch/master/graph/badge.svg?token=pAstxAAjYo)](https://codecov.io/gh/redis/jedis)
-[![Discord](https://img.shields.io/discord/697882427875393627?style=flat-square)](https://discord.gg/qRhBuY8Z)
+[![Discord](https://img.shields.io/discord/697882427875393627?style=flat-square)](https://discord.gg/redis)
 
 ## What is Jedis?
 
@@ -14,25 +14,37 @@ Jedis is a Java client for [Redis](https://github.com/redis/redis "Redis") desig
 
 Are you looking for a high-level library to handle object mapping? See [redis-om-spring](https://github.com/redis/redis-om-spring)!
 
-## Contributing
+## How do I Redis?
 
-We'd love your contributions!
+[Learn for free at Redis University](https://university.redis.io/academy/)
 
-**Bug reports** are always welcome! [You can open a bug report on GitHub](https://github.com/redis/jedis/issues/new).
+[Try the Redis Cloud](https://redis.io/try-free/)
 
-You can also **contribute documentation** -- or anything to improve Jedis. Please see
-[contribution guideline](https://github.com/redis/jedis/blob/master/.github/CONTRIBUTING.md) for more details.
+[Dive in developer tutorials](https://redis.io/learn/)
+
+[Join the Redis community](https://redis.io/community/)
+
+[Work at Redis](https://redis.io/careers/jobs/)
 
 ## Supported Redis versions
 
-The most recent version of this library supports redis version [5.0](https://github.com/redis/redis/blob/5.0/00-RELEASENOTES), [6.0](https://github.com/redis/redis/blob/6.0/00-RELEASENOTES), [6.2](https://github.com/redis/redis/blob/6.2/00-RELEASENOTES), and [7.0](https://github.com/redis/redis/blob/7.0/00-RELEASENOTES).
+The most recent version of this library supports redis version 
+[5.0](https://github.com/redis/redis/blob/5.0/00-RELEASENOTES), 
+[6.0](https://github.com/redis/redis/blob/6.0/00-RELEASENOTES), 
+[6.2](https://github.com/redis/redis/blob/6.2/00-RELEASENOTES), 
+[7.0](https://github.com/redis/redis/blob/7.0/00-RELEASENOTES), 
+[7.2](https://github.com/redis/redis/blob/7.2/00-RELEASENOTES) and 
+[7.4](https://github.com/redis/redis/blob/7.4/00-RELEASENOTES).
 
 The table below highlights version compatibility of the most-recent library versions and Redis versions. Compatibility means communication features, and Redis command capabilities.
 
-| Library version | Supported redis versions |
-|-----------------|-------------------|
-| 3.9+ | 5.0 and 6.2 Family of releases |
-| >= 4.0 | Version 5.0 to current |
+
+| Jedis version | Supported Redis versions              | JDK Compatibility |
+|---------------|---------------------------------------|-------------------|
+| 3.9+          | 5.0 to 6.2 Family of releases         | 8, 11             |
+| >= 4.0        | Version 5.0 to 7.2 Family of releases | 8, 11, 17         |
+| >= 5.0        | Version 6.0 to current                | 8, 11, 17, 21     |
+| >= 5.2        | Version 7.2 to current                | 8, 11, 17, 21     |
 
 ## Getting started
 
@@ -42,7 +54,7 @@ To get started with Jedis, first add it as a dependency in your Java project. If
 <dependency>
     <groupId>redis.clients</groupId>
     <artifactId>jedis</artifactId>
-    <version>4.3.0</version>
+    <version>5.2.0</version>
 </dependency>
 ```
 
@@ -78,7 +90,7 @@ for the complete list of supported commands.
 
 ### Easier way of using connection pool
 
-Using a *try-with-resources* block for each command may be cumbursome, so you may consider using JedisPooled.
+Using a *try-with-resources* block for each command may be cumbersome, so you may consider using JedisPooled.
 
 ```java
 JedisPooled jedis = new JedisPooled("localhost", 6379);
@@ -108,11 +120,18 @@ Now you can use the `JedisCluster` instance and send commands like you would wit
 jedis.sadd("planets", "Mars");
 ```
 
+## Using Redis modules
+
+Jedis includes support for [Redis modules](https://redis.io/docs/modules/) such as
+[RedisJSON](https://redis.io/json/) and [RediSearch](https://redis.io/search/).
+
+See the [RedisJSON Jedis](docs/redisjson.md) or [RediSearch Jedis](docs/redisearch.md) for details.
+
 ## Failover
 
 Jedis supports retry and failover for your Redis deployments. This is useful when:
 
-1. You have more than one Redis deployment. This might include two independent Redis servers or two or more Redis databases replicated across multiple [active-active Redis Enterprise](https://docs.redis.com/latest/rs/databases/active-active/) clusters.
+1. You have more than one Redis deployment. This might include two independent Redis servers or two or more Redis databases replicated across multiple [active-active Redis Enterprise](https://redis.io/docs/latest/operate/rs/databases/active-active/) clusters.
 2. You want your application to connect to one deployment at a time and to fail over to the next available deployment if the first deployment becomes unavailable.
 
 For the complete failover configuration options and examples, see the [Jedis failover docs](docs/failover.md).
@@ -126,26 +145,27 @@ You can also check the [latest Jedis Javadocs](https://www.javadoc.io/doc/redis.
 Some specific use-case examples can be found in [`redis.clients.jedis.examples`
 package](src/test/java/redis/clients/jedis/examples/) of the test source codes.
 
-## Using Redis modules
-
-Jedis includes support for [Redis modules](https://redis.io/docs/modules/) such as
-[RedisJSON](https://oss.redis.com/redisjson/) and [RediSearch](https://oss.redis.com/redisearch/).
-
-See the [RedisJSON Jedis](docs/redisjson.md) or [RediSearch Jedis](docs/redisearch.md) for details.
-
 ## Troubleshooting
 
 If you run into trouble or have any questions, we're here to help!
 
-Hit us up on the [Redis Discord Server](http://discord.gg/redis) or [open an issue on GitHub](https://github.com/redis/jedis).
+Hit us up on the [Redis Discord Server](http://discord.gg/redis) or 
+[Jedis GitHub Discussions](https://github.com/redis/jedis/discussions) or 
+[Jedis mailing list](http://groups.google.com/group/jedis_redis).
 
-You can also find help on the [Jedis mailing list](http://groups.google.com/group/jedis_redis) or the
-[GitHub Discussions](https://github.com/redis/jedis/discussions).
+## Contributing
+
+We'd love your contributions!
+
+Bug reports are always welcome! [You can open a bug report on GitHub](https://github.com/redis/jedis/issues/new).
+
+You can also contribute documentation -- or anything to improve Jedis. Please see
+[contribution guideline](https://github.com/redis/jedis/blob/master/.github/CONTRIBUTING.md) for more details.
 
 ## License
 
-Jedis is licensed under the [MIT license](https://github.com/redis/jedis/blob/master/LICENSE.txt).
+Jedis is licensed under the [MIT license](https://github.com/redis/jedis/blob/master/LICENSE).
 
 ## Sponsorship
 
-[![Redis Logo](redis-logo-full-color-rgb.png)](https://redis.com/)
+[![Redis Logo](redis-logo-full-color-rgb.png)](https://redis.io/)

@@ -14,6 +14,8 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+
+import redis.clients.jedis.annots.Experimental;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 /**
@@ -41,6 +43,12 @@ public class RedisInputStream extends FilterInputStream {
 
   public RedisInputStream(InputStream in) {
     this(in, INPUT_BUFFER_SIZE);
+  }
+
+  @Experimental
+  public boolean peek(byte b) throws JedisConnectionException {
+    ensureFill(); // in current design, at least one reply is expected. so ensureFillSafe() is not necessary.
+    return buf[count] == b;
   }
 
   public byte readByte() throws JedisConnectionException {
@@ -84,7 +92,7 @@ public class RedisInputStream extends FilterInputStream {
     }
 
     final String reply = sb.toString();
-    if (reply.length() == 0) {
+    if (reply.isEmpty()) {
       throw new JedisConnectionException("It seems like server has closed the connection.");
     }
 
@@ -128,7 +136,7 @@ public class RedisInputStream extends FilterInputStream {
 
   /**
    * Slow path in case a line of bytes cannot be read in one #fill() operation. This is still faster
-   * than creating the StrinbBuilder, String, then encoding as byte[] in Protocol, then decoding
+   * than creating the StringBuilder, String, then encoding as byte[] in Protocol, then decoding
    * back into a String.
    */
   private byte[] readLineBytesSlowly() {
@@ -176,9 +184,12 @@ public class RedisInputStream extends FilterInputStream {
 
     ensureCrLf();
     switch (b) {
-      case 't': return true;
-      case 'f': return false;
-      default: throw new JedisConnectionException("Unexpected character!");
+      case 't':
+        return true;
+      case 'f':
+        return false;
+      default:
+        throw new JedisConnectionException("Unexpected character!");
     }
   }
 
@@ -236,7 +247,7 @@ public class RedisInputStream extends FilterInputStream {
   }
 
   /**
-   * This methods assumes there are required bytes to be read. If we cannot read anymore bytes an
+   * This method assumes there are required bytes to be read. If we cannot read anymore bytes an
    * exception is thrown to quickly ascertain that the stream was smaller than expected.
    */
   private void ensureFill() throws JedisConnectionException {
@@ -252,4 +263,12 @@ public class RedisInputStream extends FilterInputStream {
       }
     }
   }
+
+  @Override
+  public int available() throws IOException {
+    int availableInBuf = limit - count;
+    int availableInSocket = this.in.available();
+    return (availableInBuf > availableInSocket) ? availableInBuf : availableInSocket;
+  }
+
 }

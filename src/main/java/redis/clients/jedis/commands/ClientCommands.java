@@ -5,6 +5,7 @@ import redis.clients.jedis.args.ClientPauseMode;
 import redis.clients.jedis.args.ClientType;
 import redis.clients.jedis.args.UnblockType;
 import redis.clients.jedis.params.ClientKillParams;
+import redis.clients.jedis.resps.TrackingInfo;
 
 /**
  * The interface contain all the commands about client.
@@ -30,10 +31,10 @@ public interface ClientCommands {
   String clientKill(String ip, int port);
 
   /**
-   * Close a given client connection.
+   * Close client connections based on certain selection parameters.
    *
-   * @param params Connection info will be closed
-   * @return Close success return OK
+   * @param params Parameters defining what client connections to close.
+   * @return The number of client connections that were closed.
    */
   long clientKill(ClientKillParams params);
 
@@ -46,7 +47,7 @@ public interface ClientCommands {
 
   /**
    * Returns information and statistics about the client connections server
-   * in a mostly human readable format.
+   * in a mostly human-readable format.
    *
    * @return All clients info connected to redis-server
    */
@@ -54,7 +55,7 @@ public interface ClientCommands {
 
   /**
    * Returns information and statistics about the client connections server
-   * in a mostly human readable format filter by client type.
+   * in a mostly human-readable format filter by client type.
    *
    * @return All clients info connected to redis-server
    */
@@ -62,7 +63,7 @@ public interface ClientCommands {
 
   /**
    * Returns information and statistics about the client connections server
-   * in a mostly human readable format filter by client ids.
+   * in a mostly human-readable format filter by client ids.
    *
    * @param clientIds Unique 64-bit client IDs
    * @return All clients info connected to redis-server
@@ -71,7 +72,7 @@ public interface ClientCommands {
 
   /**
    * Returns information and statistics about the current client connection
-   * in a mostly human readable format.
+   * in a mostly human-readable format.
    *
    * @return Information and statistics about the current client connection
    */
@@ -170,4 +171,6 @@ public interface ClientCommands {
    * @return OK
    */
   String clientNoTouchOff();
+
+  TrackingInfo clientTrackingInfo();
 }

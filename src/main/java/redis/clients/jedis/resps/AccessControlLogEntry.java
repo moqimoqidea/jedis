@@ -6,9 +6,10 @@ import java.util.Map;
 
 /**
  * This class holds information about an Access Control Log entry (returned by ACL LOG command) They
- * can be access via getters. For future purpose there is also {@link #getlogEntry} method that
+ * can be accessed via getters. For future purpose there is also {@link #getlogEntry} method that
  * returns a generic {@code Map} - in case where more info is returned from a server
  */
+// TODO: remove
 public class AccessControlLogEntry implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -46,9 +47,10 @@ public class AccessControlLogEntry implements Serializable {
     ageSeconds = (Double) map.get(AGE_SECONDS);
     clientInfo = getMapFromRawClientInfo((String) map.get(CLIENT_INFO));
     logEntry = map;
-    entryId = (long) map.get(ENTRY_ID);
-    timestampCreated = (long) map.get(TIMESTAMP_CREATED);
-    timestampLastUpdated = (long) map.get(TIMESTAMP_LAST_UPDATED);
+    // Redis 7.2
+    entryId = map.containsKey(ENTRY_ID) ? (long) map.get(ENTRY_ID) : -1L;
+    timestampCreated = map.containsKey(TIMESTAMP_CREATED) ? (long) map.get(TIMESTAMP_CREATED) : -1L;
+    timestampLastUpdated = map.containsKey(TIMESTAMP_LAST_UPDATED) ? (long) map.get(TIMESTAMP_LAST_UPDATED) : -1L;
   }
 
   public long getCount() {

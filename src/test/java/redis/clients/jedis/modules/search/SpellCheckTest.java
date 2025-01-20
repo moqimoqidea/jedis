@@ -13,12 +13,16 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import redis.clients.jedis.RedisProtocol;
 import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.modules.RedisModuleCommandsTestBase;
 import redis.clients.jedis.search.FTSpellCheckParams;
 import redis.clients.jedis.search.schemafields.TextField;
 
+@RunWith(Parameterized.class)
 public class SpellCheckTest extends RedisModuleCommandsTestBase {
 
   private static final String index = "spellcheck";
@@ -32,6 +36,10 @@ public class SpellCheckTest extends RedisModuleCommandsTestBase {
 //  public static void tearDown() {
 ////    RedisModuleCommandsTestBase.tearDown();
 //  }
+
+  public SpellCheckTest(RedisProtocol protocol) {
+    super(protocol);
+  }
 
   private static Map<String, String> toMap(String... values) {
     Map<String, String> map = new HashMap<>();
@@ -52,7 +60,8 @@ public class SpellCheckTest extends RedisModuleCommandsTestBase {
   @Test
   public void dictionaryBySampleKey() {
     assertEquals(3L, client.ftDictAddBySampleKey(index, "dict", "foo", "bar", "hello world"));
-    assertEquals(new HashSet<>(Arrays.asList("foo", "bar", "hello world")), client.ftDictDumpBySampleKey(index, "dict"));
+    assertEquals(new HashSet<>(Arrays.asList("foo", "bar", "hello world")),
+        client.ftDictDumpBySampleKey(index, "dict"));
     assertEquals(3L, client.ftDictDelBySampleKey(index, "dict", "foo", "bar", "hello world"));
     assertEquals(Collections.emptySet(), client.ftDictDumpBySampleKey(index, "dict"));
   }
@@ -61,8 +70,8 @@ public class SpellCheckTest extends RedisModuleCommandsTestBase {
   public void basicSpellCheck() {
     client.ftCreate(index, TextField.of("name"), TextField.of("body"));
     client.hset("doc1", toMap("name", "name1", "body", "body1"));
-    client.hset("doc1", toMap("name", "name2", "body", "body2"));
-    client.hset("doc1", toMap("name", "name2", "body", "name2"));
+    client.hset("doc2", toMap("name", "name2", "body", "body2"));
+    client.hset("doc3", toMap("name", "name2", "body", "name2"));
 
     Map<String, Map<String, Double>> reply = client.ftSpellCheck(index, "name");
     assertEquals(Collections.singleton("name"), reply.keySet());
@@ -74,7 +83,8 @@ public class SpellCheckTest extends RedisModuleCommandsTestBase {
     client.ftCreate(index, TextField.of("report"));
     client.ftDictAdd("slang", "timmies", "toque", "toonie", "serviette", "kerfuffle", "chesterfield");
 
-    Map<String, Map<String, Double>> expected = Collections.singletonMap("tooni", Collections.singletonMap("toonie", 0d));
+    Map<String, Map<String, Double>> expected = Collections.singletonMap("tooni",
+        Collections.singletonMap("toonie", 0d));
     assertEquals(expected, client.ftSpellCheck(index, "Tooni toque kerfuffle",
         FTSpellCheckParams.spellCheckParams().includeTerm("slang").excludeTerm("slang")));
   }
@@ -92,6 +102,7 @@ public class SpellCheckTest extends RedisModuleCommandsTestBase {
     JedisDataException error = Assert.assertThrows(JedisDataException.class,
         () -> client.ftSpellCheck(index, "Tooni toque kerfuffle",
             FTSpellCheckParams.spellCheckParams().dialect(0)));
-    MatcherAssert.assertThat(error.getMessage(), Matchers.containsString("DIALECT requires a non negative integer"));
+    MatcherAssert.assertThat(error.getMessage(),
+        Matchers.containsString("DIALECT requires a non negative integer"));
   }
 }

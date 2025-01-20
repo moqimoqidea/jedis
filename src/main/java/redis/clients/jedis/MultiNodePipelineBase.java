@@ -1,6 +1,5 @@
 package redis.clients.jedis;
 
-import java.io.Closeable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -14,16 +13,12 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import redis.clients.jedis.commands.PipelineBinaryCommands;
-import redis.clients.jedis.commands.PipelineCommands;
-import redis.clients.jedis.commands.RedisModulePipelineCommands;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.graph.GraphCommandObjects;
 import redis.clients.jedis.providers.ConnectionProvider;
 import redis.clients.jedis.util.IOUtils;
 
-public abstract class MultiNodePipelineBase extends PipelineBase
-    implements PipelineCommands, PipelineBinaryCommands, RedisModulePipelineCommands, Closeable {
+public abstract class MultiNodePipelineBase extends PipelineBase {
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -37,8 +32,6 @@ public abstract class MultiNodePipelineBase extends PipelineBase
   private final Map<HostAndPort, Queue<Response<?>>> pipelinedResponses;
   private final Map<HostAndPort, Connection> connections;
   private volatile boolean syncing = false;
-
-  private final ExecutorService executorService = Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);
 
   public MultiNodePipelineBase(CommandObjects commandObjects) {
     super(commandObjects);
@@ -70,9 +63,6 @@ public abstract class MultiNodePipelineBase extends PipelineBase
       queue = pipelinedResponses.get(nodeKey);
       connection = connections.get(nodeKey);
     } else {
-      pipelinedResponses.putIfAbsent(nodeKey, new LinkedList<>());
-      queue = pipelinedResponses.get(nodeKey);
-
       Connection newOne = getConnection(nodeKey);
       connections.putIfAbsent(nodeKey, newOne);
       connection = connections.get(nodeKey);
@@ -80,6 +70,9 @@ public abstract class MultiNodePipelineBase extends PipelineBase
         log.debug("Duplicate connection to {}, closing it.", nodeKey);
         IOUtils.closeQuietly(newOne);
       }
+
+      pipelinedResponses.putIfAbsent(nodeKey, new LinkedList<>());
+      queue = pipelinedResponses.get(nodeKey);
     }
 
     connection.sendCommand(commandObject.getArguments());
@@ -103,6 +96,8 @@ public abstract class MultiNodePipelineBase extends PipelineBase
       return;
     }
     syncing = true;
+
+    ExecutorService executorService = Executors.newFixedThreadPool(MULTI_NODE_PIPELINE_SYNC_WORKERS);
 
     CountDownLatch countDownLatch = new CountDownLatch(pipelinedResponses.size());
     Iterator<Map.Entry<HostAndPort, Queue<Response<?>>>> pipelinedResponsesIterator
@@ -135,6 +130,8 @@ public abstract class MultiNodePipelineBase extends PipelineBase
     } catch (InterruptedException e) {
       log.error("Thread is interrupted during sync.", e);
     }
+
+    executorService.shutdownNow();
 
     syncing = false;
   }
